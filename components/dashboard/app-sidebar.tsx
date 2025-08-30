@@ -47,11 +47,6 @@ const getRoleData = (role: string) => {
         url: `/dashboard/${role}/help-centre`,
         icon: LifeBuoy,
       },
-      {
-        title: "Settings",
-        url: "/dashboard/settings", // A generic settings page
-        icon: Settings,
-      },
     ],
   }
 

@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -52,7 +51,7 @@ const brandCTAs = [
 export default function ContentStudioPage() {
   const [messages, setMessages] = React.useState<Message[]>([])
   const [input, setInput] = React.useState("")
-  const [drafts, setDrafts] = React.useState<Draft[]>(initialDrafts)
+  const [drafts] = React.useState<Draft[]>(initialDrafts)
   const [activeDraft, setActiveDraft] = React.useState<Draft | null>(null)
   const [isGenerating, setIsGenerating] = React.useState(false)
 
@@ -75,7 +74,7 @@ export default function ContentStudioPage() {
                             <CardTitle className="text-base">Option 1: Casual & Witty</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm">"Tired of your content flopping? 😴 Let's turn those crickets into conversions. Here's the secret sauce... 🌶️"</p>
+                            <p className="text-sm">&quot;Tired of your content flopping? 😴 Let&apos;s turn those crickets into conversions. Here&apos;s the secret sauce... 🌶️&quot;</p>
                         </CardContent>
                     </Card>
                     <Card className="bg-background">
@@ -83,7 +82,7 @@ export default function ContentStudioPage() {
                             <CardTitle className="text-base">Option 2: Formal & Authoritative</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm">"Maximizing content ROI requires a strategic approach. We will explore three foundational pillars to elevate your brand's digital presence."</p>
+                            <p className="text-sm">&quot;Maximizing content ROI requires a strategic approach. We will explore three foundational pillars to elevate your brand&apos;s digital presence.&quot;</p>
                         </CardContent>
                     </Card>
                     <Card className="bg-background">
@@ -91,7 +90,7 @@ export default function ContentStudioPage() {
                             <CardTitle className="text-base">Option 3: Trendy & Punchy</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm">"POV: You just found the ultimate content hack. ✨ It's giving... main character energy. Bet. 👇"</p>
+                            <p className="text-sm">&quot;POV: You just found the ultimate content hack. ✨ It&apos;s giving... main character energy. Bet. 👇&quot;</p>
                         </CardContent>
                     </Card>
                 </div>
