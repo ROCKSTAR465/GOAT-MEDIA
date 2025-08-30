@@ -77,12 +77,12 @@
   --input: oklch(0.9 0 0);
   --ring: oklch(0.8 0.18 85);
 
-  /* Charts: Shades of yellow and grey */
-  --chart-1: oklch(0.8 0.18 85); /* Yellow */
-  --chart-2: oklch(0.4 0 0);      /* Dark Grey */
-  --chart-3: oklch(0.6 0 0);      /* Medium Grey */
-  --chart-4: oklch(0.8 0 0);      /* Light Grey */
-  --chart-5: oklch(0.2 0 0);      /* Darkest Grey */
+  /* Charts: A vibrant palette */
+  --chart-1: oklch(0.8 0.18 85);   /* Yellow */
+  --chart-2: oklch(0.7 0.2 250);  /* Blue */
+  --chart-3: oklch(0.7 0.2 150);  /* Green */
+  --chart-4: oklch(0.7 0.2 30);   /* Orange */
+  --chart-5: oklch(0.7 0.2 330);  /* Pink */
 
   /* Sidebar: Almost white */
   --sidebar: oklch(0.98 0 0);
@@ -120,19 +120,19 @@
 
   /* Accent: Yellow */
   --accent: oklch(0.85 0.2 85);
-  --accent-foreground: oklch(0.1 0 0);
+  --accent-foreground: oklch(0.98 0 0);
 
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(0.2 0.01 85);
   --input: oklch(0.2 0.01 85);
   --ring: oklch(0.85 0.2 85);
 
-  /* Charts: Shades of yellow and grey for dark mode */
-  --chart-1: oklch(0.85 0.2 85); /* Yellow */
-  --chart-2: oklch(0.98 0 0);      /* White */
-  --chart-3: oklch(0.7 0 0);      /* Light Grey */
-  --chart-4: oklch(0.5 0 0);      /* Medium Grey */
-  --chart-5: oklch(0.3 0 0);      /* Dark Grey */
+  /* Charts: A vibrant palette for dark mode */
+  --chart-1: oklch(0.85 0.2 85);   /* Yellow */
+  --chart-2: oklch(0.75 0.22 250); /* Blue */
+  --chart-3: oklch(0.75 0.22 150); /* Green */
+  --chart-4: oklch(0.75 0.22 30);  /* Orange */
+  --chart-5: oklch(0.75 0.22 330); /* Pink */
 
   /* Sidebar: Very dark grey */
   --sidebar: oklch(0.1 0.01 85);
