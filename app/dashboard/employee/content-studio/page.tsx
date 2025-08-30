@@ -1,179 +1,201 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
+import * as React from "react"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BorderBeam } from "@/components/ui/border-beam"
-import { Label } from "@/components/ui/label"
-import { Film } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Bot, User, Sparkles, Save, Edit, Send, FileText, Lightbulb } from "lucide-react"
+
+interface Message {
+  sender: "user" | "ai"
+  text: string | React.ReactNode
+}
+
+interface Draft {
+  version: string
+  content: string
+}
+
+const initialDrafts: Draft[] = [
+  {
+    version: "V1",
+    content: "Initial script focusing on pain points. Casual tone.",
+  },
+  {
+    version: "V2",
+    content: "Revised with a stronger call-to-action. More formal.",
+  },
+]
+
+const brandHooks = [
+    "The one thing everyone gets wrong about...",
+    "3 myths about [topic] busted.",
+    "The secret to [achieving result] is not what you think."
+]
+
+const brandCTAs = [
+    "Swipe up to learn more!",
+    "Comment 'YES' to get the guide.",
+    "Link in bio for the full story."
+]
 
 export default function ContentStudioPage() {
-  const [generatedContent, setGeneratedContent] = useState("")
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [messages, setMessages] = React.useState<Message[]>([])
+  const [input, setInput] = React.useState("")
+  const [drafts, setDrafts] = React.useState<Draft[]>(initialDrafts)
+  const [activeDraft, setActiveDraft] = React.useState<Draft | null>(null)
+  const [isGenerating, setIsGenerating] = React.useState(false)
 
-  const generateContent = () => {
+  const handleSend = (prompt?: string) => {
+    const textToSend = prompt || input
+    if (!textToSend.trim()) return
+
+    const userMessage: Message = { sender: "user", text: textToSend }
+    setMessages(prev => [...prev, userMessage])
+
     setIsGenerating(true)
     setTimeout(() => {
-      const sampleContent = `🎯 CONTENT PACK GENERATED - TechStart Solutions
+        const aiResponse: Message = {
+            sender: "ai",
+            text: (
+                <div className="space-y-4">
+                    <p>Here are a few options based on your prompt:</p>
+                    <Card className="bg-background">
+                        <CardHeader>
+                            <CardTitle className="text-base">Option 1: Casual & Witty</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm">"Tired of your content flopping? 😴 Let's turn those crickets into conversions. Here's the secret sauce... 🌶️"</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-background">
+                        <CardHeader>
+                            <CardTitle className="text-base">Option 2: Formal & Authoritative</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm">"Maximizing content ROI requires a strategic approach. We will explore three foundational pillars to elevate your brand's digital presence."</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-background">
+                        <CardHeader>
+                            <CardTitle className="text-base">Option 3: Trendy & Punchy</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm">"POV: You just found the ultimate content hack. ✨ It's giving... main character energy. Bet. 👇"</p>
+                        </CardContent>
+                    </Card>
+                </div>
+            )
+        }
+        setMessages(prev => [...prev, aiResponse])
+        setIsGenerating(false)
+    }, 1500)
 
-📝 SCRIPT 1: "The Hidden Cost of Manual Processes"
-Hook: "Your team spends 40% of their time on tasks a robot could do..."
-CTA: Book a free automation audit
-
-📝 SCRIPT 2: "Why 90% of Startups Fail at Scaling"
-Hook: "The difference between a ₹10L company and ₹1Cr company isn't what you think..."
-CTA: Download our scaling blueprint
-
-📝 SCRIPT 3: "The 3-Minute Rule That Doubled Our Productivity"
-Hook: "If you can't explain your process in 3 minutes, it's broken..."
-CTA: Get our process optimization checklist
-
-📝 SCRIPT 4: "From Chaos to System: A Real Transformation"
-Hook: "6 months ago, this CEO was working 80-hour weeks..."
-CTA: Watch the full case study
-
-📝 SCRIPT 5: "The Automation Myth That's Costing You Money"
-Hook: "Everyone thinks automation is expensive. Here's the truth..."
-CTA: Calculate your automation ROI
-
-✅ All scripts include:
-- Platform-specific formatting (IG/YT/FB)
-- B-roll suggestions
-- Engagement hooks
-- Clear CTAs aligned with funnel stage
-- Brand voice consistency check passed`
-
-      setGeneratedContent(sampleContent)
-      setIsGenerating(false)
-    }, 2000)
+    setInput("")
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Film className="h-8 w-8" /> Content Studio
-          </h1>
-          <p className="text-gray-400 mt-1">AI-powered content generation and management</p>
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-8rem)]">
+      {/* Left Sidebar: Draft History */}
+      <div className="lg:col-span-1">
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center"><FileText className="mr-2"/> Draft History</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {drafts.map((draft) => (
+              <Button key={draft.version} variant={activeDraft?.version === draft.version ? "secondary" : "ghost"} className="w-full justify-start" onClick={() => setActiveDraft(draft)}>
+                <Badge className="mr-2">{draft.version}</Badge> {draft.content.substring(0,25)}...
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="relative">
-          <BorderBeam />
+      {/* Main Panel: Chat Interface */}
+      <div className="lg:col-span-2 flex flex-col h-full">
+        <Card className="flex-grow flex flex-col">
           <CardHeader>
-            <CardTitle>AI Content Generator</CardTitle>
+            <CardTitle className="flex items-center"><Bot className="mr-2"/> Content Studio Chatbot</CardTitle>
+            <CardDescription>Draft scripts by chatting with the AI.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <ScrollArea className="h-[calc(100vh-22rem)] pr-4">
+                <div className="space-y-6">
+                {messages.map((msg, index) => (
+                  <div key={index} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
+                    {msg.sender === 'ai' && <Avatar><AvatarFallback><Bot/></AvatarFallback></Avatar>}
+                    <div className={`rounded-lg px-4 py-2 max-w-[90%] ${msg.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-background border'}`}>
+                      {typeof msg.text === 'string' ? <p className="text-sm">{msg.text}</p> : msg.text}
+                    </div>
+                    {msg.sender === 'user' && <Avatar><AvatarFallback><User/></AvatarFallback></Avatar>}
+                  </div>
+                ))}
+                {isGenerating && (
+                    <div className="flex items-start gap-3">
+                        <Avatar><AvatarFallback><Bot/></AvatarFallback></Avatar>
+                        <div className="rounded-lg px-4 py-2 bg-background border"><Sparkles className="h-5 w-5 animate-spin"/></div>
+                    </div>
+                )}
+                </div>
+            </ScrollArea>
+          </CardContent>
+          <div className="p-4 border-t">
+            <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => handleSend("Make it more casual")}>Casual</Button>
+                <Button variant="outline" size="sm" onClick={() => handleSend("Make it more formal")}>Formal</Button>
+                <Button variant="outline" size="sm" onClick={() => handleSend("Make it more trendy")}>Trendy</Button>
+            </div>
+            <div className="mt-2 flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="e.g., Draft a 20-sec IG Reel script about our new feature"
+                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              />
+              <Button onClick={() => handleSend()}><Send className="h-4 w-4" /></Button>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+                <Button variant="outline"><Save className="mr-2 h-4 w-4"/> Save Draft</Button>
+                <Button variant="outline"><Edit className="mr-2 h-4 w-4"/> Edit</Button>
+                <Button><Send className="mr-2 h-4 w-4"/> Submit for Approval</Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Right Sidebar: Brand Guide */}
+      <div className="lg:col-span-1">
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center"><Lightbulb className="mr-2"/> Brand Guide</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label>Client/Brand</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select client" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="techstart">TechStart Solutions</SelectItem>
-                  <SelectItem value="digital">Digital Innovations</SelectItem>
-                  <SelectItem value="growth">GrowthCorp</SelectItem>
-                  <SelectItem value="brand">BrandBoost</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Content Type</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select content type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="awareness">Awareness Content</SelectItem>
-                  <SelectItem value="conversion">Conversion Content</SelectItem>
-                  <SelectItem value="mixed">Mixed Pack (5+5)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Target Platform</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select platform" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="instagram">Instagram Reels</SelectItem>
-                  <SelectItem value="youtube">YouTube Shorts</SelectItem>
-                  <SelectItem value="facebook">Facebook Reels</SelectItem>
-                  <SelectItem value="all">All Platforms</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={generateContent} disabled={isGenerating} className="w-full">
-              <Film className="w-4 h-4 mr-2" />
-              {isGenerating ? "Generating..." : "Generate Content Pack"}
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="relative">
-          <BorderBeam />
-          <CardHeader>
-            <CardTitle>Content Workflow</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { stage: "Script Generation", status: "completed", count: 5 },
-                { stage: "Review & Approval", status: "in-progress", count: 3 },
-                { stage: "Shoot Planning", status: "pending", count: 2 },
-                { stage: "Post Production", status: "pending", count: 0 },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-secondary rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        item.status === "completed"
-                          ? "bg-green-400"
-                          : item.status === "in-progress"
-                            ? "bg-yellow-400 animate-pulse"
-                            : "bg-gray-400"
-                      }`}
-                    />
-                    <span>{item.stage}</span>
-                  </div>
-                  <Badge variant="outline">{item.count} items</Badge>
-                </div>
-              ))}
-            </div>
+              <div>
+                  <h4 className="font-semibold text-sm mb-2">Hooks</h4>
+                  <ul className="space-y-2">
+                      {brandHooks.map((hook, i) => <li key={i} className="text-xs text-muted-foreground p-2 bg-secondary rounded-md">{hook}</li>)}
+                  </ul>
+              </div>
+               <div>
+                  <h4 className="font-semibold text-sm mb-2">Calls to Action (CTAs)</h4>
+                  <ul className="space-y-2">
+                      {brandCTAs.map((cta, i) => <li key={i} className="text-xs text-muted-foreground p-2 bg-secondary rounded-md">{cta}</li>)}
+                  </ul>
+              </div>
           </CardContent>
         </Card>
       </div>
-
-      {generatedContent && (
-        <Card className="relative">
-          <BorderBeam />
-          <CardHeader>
-            <CardTitle>Generated Content Pack</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              value={generatedContent}
-              readOnly
-              className="min-h-[400px] font-mono text-sm resize-none"
-            />
-            <div className="flex gap-3 mt-4">
-              <Button>Approve Content</Button>
-              <Button variant="outline">Request Revisions</Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }
