@@ -133,7 +133,7 @@ export function MyTasksHub({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5" />
-            Today's Priority Tasks
+            Today&apos;s Priority Tasks
           </CardTitle>
         </CardHeader>
         <CardContent>

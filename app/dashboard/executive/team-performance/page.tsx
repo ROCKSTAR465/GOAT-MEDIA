@@ -1,283 +1,178 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BorderBeam } from "@/components/ui/border-beam"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { BarChart3, UserCheck, Plus, X } from "lucide-react"
+import * as React from "react"
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Line, LineChart, Sparkline } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Users, BarChart3, TrendingUp, Check, Clock, Award } from "lucide-react"
 
 interface TeamMember {
+  id: string
   name: string
   role: string
+  avatar: string
   status: "active" | "busy"
+  tasksCompleted: number
+  avgCompletionTime: number // in hours
+  achievements: string[]
+  performanceData: { month: string; tasks: number }[]
 }
-
-interface Team {
-  name: string
-  efficiency: string
-  projects: string
-  members: TeamMember[]
-}
-
-const initialTeams: Team[] = [
-  {
-    name: "Del Team",
-    efficiency: "94%",
-    projects: "6 active projects",
-    members: [
-      { name: "Arjun Mehta", role: "Creative Director", status: "active" },
-      { name: "Priya Sharma", role: "Project Manager", status: "busy" },
-      { name: "Rahul Singh", role: "Video Editor", status: "active" },
-      { name: "Neha Gupta", role: "Social Media Manager", status: "active" },
-    ],
-  },
-  {
-    name: "Centinals",
-    efficiency: "97%",
-    projects: "9 active projects",
-    members: [
-      { name: "Sanjay Kumar", role: "Creative Director", status: "active" },
-      { name: "Kavya Reddy", role: "Project Manager", status: "active" },
-      { name: "Amit Patel", role: "Video Editor", status: "busy" },
-      { name: "Riya Agarwal", role: "Social Media Manager", status: "active" },
-    ],
-  },
-  {
-    name: "Alpha Team",
-    efficiency: "91%",
-    projects: "5 active projects",
-    members: [
-      { name: "Vikram Singh", role: "Creative Director", status: "active" },
-      { name: "Sunita Verma", role: "Project Manager", status: "active" },
-      { name: "Rohit Sharma", role: "Video Editor", status: "active" },
-      { name: "Pooja Singh", role: "Social Media Manager", status: "busy" },
-    ],
-  },
-]
 
 const teamPerformanceData = [
-  { team: "Del Team", efficiency: 94, projects: 6, revenue: 180000 },
-  { team: "Centinals", efficiency: 97, projects: 9, revenue: 250000 },
-  { team: "Alpha Team", efficiency: 91, projects: 5, revenue: 150000 },
+  { name: 'Content', tasks: 45 },
+  { name: 'Editing', tasks: 30 },
+  { name: 'Management', tasks: 15 },
+  { name: 'Design', tasks: 25 },
 ]
 
-// Chart configurations for better tooltip styling
-const teamEfficiencyConfig = {
-  efficiency: {
-    label: "Efficiency",
-    color: "hsl(var(--chart-1))",
+const productivityData = [
+    { name: 'Week 1', completed: 80, assigned: 100 },
+    { name: 'Week 2', completed: 90, assigned: 100 },
+    { name: 'Week 3', completed: 75, assigned: 90 },
+    { name: 'Week 4', completed: 95, assigned: 100 },
+]
+
+const initialTeams: { name: string, members: TeamMember[] }[] = [
+  {
+    name: "Content & Strategy",
+    members: [
+      { id: "EMP-01", name: "Alex", role: "Content Strategist", avatar: "/avatars/alex.jpg", status: "active", tasksCompleted: 45, avgCompletionTime: 4, achievements: ["Top Performer Q2"], performanceData: [{month: 'Jan', tasks: 10}, {month: 'Feb', tasks: 12}] },
+      { id: "EMP-02", name: "Casey", role: "Scriptwriter", avatar: "/avatars/casey.jpg", status: "busy", tasksCompleted: 38, avgCompletionTime: 5, achievements: [], performanceData: [{month: 'Jan', tasks: 8}, {month: 'Feb', tasks: 10}] },
+    ]
   },
-};
-
-const teamRevenueConfig = {
-  revenue: {
-    label: "Revenue",
-    color: "hsl(var(--chart-1))",
-  },
-};
-
-export default function TeamManagementPage() {
-  const [teams, setTeams] = useState<Team[]>(initialTeams)
-  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false)
-  const [showAnalytics, setShowAnalytics] = useState(false)
-
-  const handleAddMember = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    const teamName = formData.get("team") as string
-    const newMember: TeamMember = {
-      name: formData.get("name") as string,
-      role: formData.get("role") as string,
-      status: "active",
-    }
-
-    setTeams(teams.map((team) => (team.name === teamName ? { ...team, members: [...team.members, newMember] } : team)))
-    setIsAddMemberModalOpen(false)
+  {
+      name: "Editing & Post-Production",
+      members: [
+        { id: "EMP-03", name: "Taylor", role: "Video Editor", avatar: "/avatars/taylor.jpg", status: "active", tasksCompleted: 52, avgCompletionTime: 6, achievements: ["Fastest Turnaround Award"], performanceData: [{month: 'Jan', tasks: 14}, {month: 'Feb', tasks: 11}] },
+      ]
   }
+]
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-500/20 text-green-400"
-      case "busy":
-        return "bg-yellow-500/20 text-yellow-400"
-      default:
-        return "bg-gray-500/20 text-gray-400"
-    }
-  }
+export default function TeamPerformancePage() {
+  const [teams, setTeams] = React.useState(initialTeams)
+  const [selectedMember, setSelectedMember] = React.useState<TeamMember | null>(null)
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <UserCheck className="h-8 w-8" /> Team Management
-          </h1>
-          <p className="text-gray-400 mt-1">Monitor team performance and manage members</p>
-        </div>
-        <div className="flex gap-3">
-          <Button onClick={() => setShowAnalytics(!showAnalytics)}>
-            <BarChart3 className="w-4 h-4 mr-2" />
-            {showAnalytics ? "Hide" : "Show"} Performance Report
-          </Button>
-          <Dialog open={isAddMemberModalOpen} onOpenChange={setIsAddMemberModalOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Member
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Team Member</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddMember} className="space-y-4">
-                <div>
-                  <Label>Team</Label>
-                  <Select name="team" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select team" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Del Team">Del Team</SelectItem>
-                      <SelectItem value="Centinals">Centinals</SelectItem>
-                      <SelectItem value="Alpha Team">Alpha Team</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Name</Label>
-                  <Input name="name" placeholder="Enter member name" required />
-                </div>
-                <div>
-                  <Label>Role</Label>
-                  <Select name="role" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Creative Director">Creative Director</SelectItem>
-                      <SelectItem value="Project Manager">Project Manager</SelectItem>
-                      <SelectItem value="Video Editor">Video Editor</SelectItem>
-                      <SelectItem value="Social Media Manager">Social Media Manager</SelectItem>
-                      <SelectItem value="Designer">Designer</SelectItem>
-                      <SelectItem value="Videographer">Videographer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button type="submit" className="w-full">
-                  Add Member
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Team Performance</h1>
+        <p className="text-muted-foreground">Monitor workload, productivity, and individual performance.</p>
       </div>
 
-      {showAnalytics && (
-        <Card className="relative">
-          <BorderBeam />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Team Performance Analytics</CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => setShowAnalytics(false)} aria-label="Close analytics">
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+            <CardTitle>Workload Distribution</CardTitle>
+            <CardDescription>How tasks are split across departments.</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Team Efficiency</h3>
-              <ChartContainer config={teamEfficiencyConfig}>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={teamPerformanceData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="team" />
-                    <YAxis />
-                    <ChartTooltip
-                      content={<ChartTooltipContent indicator="dot" />}
-                    />
-                    <Bar dataKey="efficiency" fill="var(--color-efficiency)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Revenue by Team</h3>
-              <ChartContainer config={teamRevenueConfig}>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={teamPerformanceData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      dataKey="revenue"
-                      label={({ team, percent }) => `${team} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {teamPerformanceData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={["#FFD700", "#8B5CF6", "#06B6D4"][index]} />
-                      ))}
-                    </Pie>
-                    <ChartTooltip
-                      formatter={(value: number) => [`₹${(value / 1000).toFixed(0)}K`, "Revenue"]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
+          <CardContent>
+            <ChartContainer config={{}} className="h-64">
+                <BarChart data={teamPerformanceData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false}/>
+                    <XAxis type="number" />
+                    <YAxis type="category" dataKey="name" width={80}/>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="tasks" fill="var(--color-primary)" radius={4}/>
+                </BarChart>
+            </ChartContainer>
           </CardContent>
         </Card>
-      )}
-
-      <div className="grid gap-6">
-        {teams.map((team, index) => (
-          <Card key={team.name} className="relative">
-            <BorderBeam delay={index * 0.2} />
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>{team.name}</CardTitle>
-                  <p className="text-gray-400">{team.projects}</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold">{team.efficiency}</div>
-                  <p className="text-sm text-gray-400">Efficiency</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {team.members.map((member, memberIndex) => (
-                <div key={memberIndex} className="p-4 bg-secondary rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold">{member.name}</h4>
-                    <Badge className={`${getStatusColor(member.status)} border-0`}>{member.status}</Badge>
-                  </div>
-                  <p className="text-sm text-gray-400">{member.role}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        ))}
+        <Card>
+          <CardHeader>
+            <CardTitle>Productivity Chart</CardTitle>
+            <CardDescription>Tasks completed vs. assigned per week.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={{}} className="h-64">
+                <LineChart data={productivityData}>
+                    <CartesianGrid strokeDasharray="3 3"/>
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line type="monotone" dataKey="completed" stroke="var(--color-primary)" strokeWidth={2} name="Completed"/>
+                    <Line type="monotone" dataKey="assigned" stroke="var(--color-secondary)" strokeDasharray="5 5" name="Assigned"/>
+                </LineChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
       </div>
+
+      {teams.map(team => (
+        <Card key={team.name}>
+            <CardHeader><CardTitle>{team.name}</CardTitle></CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {team.members.map(member => (
+                    <div key={member.id} className="p-4 bg-secondary rounded-lg cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedMember(member)}>
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                                <Avatar><AvatarImage src={member.avatar}/><AvatarFallback>{member.name.charAt(0)}</AvatarFallback></Avatar>
+                                <div>
+                                    <h4 className="font-semibold">{member.name}</h4>
+                                    <p className="text-sm text-muted-foreground">{member.role}</p>
+                                </div>
+                            </div>
+                            <Badge variant={member.status === "active" ? "default" : "outline"} className={member.status === "active" ? "bg-green-500" : ""}>{member.status}</Badge>
+                        </div>
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+      ))}
+
+      <Dialog open={!!selectedMember} onOpenChange={(isOpen) => !isOpen && setSelectedMember(null)}>
+        <DialogContent className="sm:max-w-md">
+            {selectedMember && (
+                <>
+                    <DialogHeader className="flex-row items-center gap-4">
+                        <Avatar className="h-16 w-16"><AvatarImage src={selectedMember.avatar}/><AvatarFallback>{selectedMember.name.charAt(0)}</AvatarFallback></Avatar>
+                        <div>
+                            <DialogTitle className="text-2xl">{selectedMember.name}</DialogTitle>
+                            <p className="text-muted-foreground">{selectedMember.role}</p>
+                            <p className="text-xs text-muted-foreground">Joined: 2023-01-15</p>
+                        </div>
+                    </DialogHeader>
+                    <div className="py-6 grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-2 p-3 bg-secondary rounded-md">
+                            <Check className="h-6 w-6 text-green-500"/>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Tasks Completed</p>
+                                <p className="font-bold text-lg">{selectedMember.tasksCompleted}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 p-3 bg-secondary rounded-md">
+                            <Clock className="h-6 w-6 text-blue-500"/>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Avg. Completion</p>
+                                <p className="font-bold text-lg">{selectedMember.avgCompletionTime} hrs</p>
+                            </div>
+                        </div>
+                        <div className="col-span-2">
+                            <h4 className="font-semibold mb-2">Achievements</h4>
+                            <div className="flex gap-2">
+                                {selectedMember.achievements.map(ach => <Badge key={ach}><Award className="mr-1 h-3 w-3"/>{ach}</Badge>)}
+                                {selectedMember.achievements.length === 0 && <p className="text-sm text-muted-foreground">No achievements yet.</p>}
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

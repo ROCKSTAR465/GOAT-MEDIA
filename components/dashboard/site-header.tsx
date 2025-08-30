@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Bell, Palette, Users, Calendar, DollarSign } from "lucide-react"
+import { Bell, Palette, Users, Calendar, DollarSign, Briefcase } from "lucide-react"
 
 const getRoleIcon = (role: string) => {
   switch (role) {
@@ -13,6 +13,8 @@ const getRoleIcon = (role: string) => {
       return Calendar
     case "finance":
       return DollarSign
+    case "executive":
+      return Briefcase
     default:
       return Users
   }
@@ -28,6 +30,8 @@ const getRoleTitle = (role: string) => {
       return "Social Media Dashboard"
     case "finance":
       return "Finance Dashboard"
+    case "executive":
+      return "Executive Dashboard"
     default:
       return "Employee Dashboard"
   }

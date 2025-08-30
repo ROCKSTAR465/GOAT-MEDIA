@@ -96,9 +96,9 @@ export default function EmployeeDashboardPage() {
       <div className="flex flex-col md:flex-row items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Welcome, {user.name}!</h1>
-          <p className="text-muted-foreground">Here's your dashboard for today.</p>
+          <p className="text-muted-foreground">Here&apos;s your dashboard for today.</p>
         </div>
-        <p className="text-sm text-muted-foreground italic">"Creativity fuels growth."</p>
+        <p className="text-sm text-muted-foreground italic">&quot;Creativity fuels growth.&quot;</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

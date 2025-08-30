@@ -78,7 +78,7 @@ export default function ExecutiveDashboardPage() {
           <h1 className="text-3xl font-bold">Executive Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, {userName}.</p>
         </div>
-        <p className="text-sm text-muted-foreground italic">"Vision without execution is just hallucination."</p>
+        <p className="text-sm text-muted-foreground italic">&quot;Vision without execution is just hallucination.&quot;</p>
       </div>
 
       {/* Summary Cards */}

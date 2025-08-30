@@ -1,290 +1,183 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BorderBeam } from "@/components/ui/border-beam"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { BarChart3, Users, Plus, X } from "lucide-react"
+import * as React from "react"
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Users, CheckCircle, XCircle, UserPlus, MessageSquare } from "lucide-react"
+
+type LeadStatus = "New" | "Contacted" | "Qualified" | "Rejected" | "Converted"
 
 interface Lead {
   id: string
+  name: string
   company: string
-  contact: string
-  source: string
-  budget: string
-  status: "new" | "contacted" | "qualified" | "converted"
-  nextAction: string
+  status: LeadStatus
+  assignedTo: string
+  assignedToAvatar: string
+  date: string
+  value: number
+}
+
+interface Interaction {
+  id: string
+  employee: string
+  employeeAvatar: string
+  timestamp: string
+  comment: string
 }
 
 const initialLeads: Lead[] = [
-  {
-    id: "1",
-    company: "TechStart Solutions",
-    contact: "Rahul Sharma - CEO",
-    source: "GOAT Mastermind",
-    budget: "₹1.5L/month",
-    status: "new",
-    nextAction: "Shortlist Call",
-  },
-  {
-    id: "2",
-    company: "Digital Innovations",
-    contact: "Priya Patel - CMO",
-    source: "Social Media",
-    budget: "₹1.2L/month",
-    status: "contacted",
-    nextAction: "Pitch Call",
-  },
-  {
-    id: "3",
-    company: "GrowthCorp",
-    contact: "Sunita Verma - Director",
-    source: "Kennet Alphy",
-    budget: "₹2.1L/month",
-    status: "qualified",
-    nextAction: "Proposal",
-  },
-  {
-    id: "4",
-    company: "SuccessStory Ltd",
-    contact: "Kavya Reddy - Marketing Head",
-    source: "GOAT Mastermind",
-    budget: "₹1.8L/month",
-    status: "converted",
-    nextAction: "Onboarding",
-  },
+  { id: "LEAD-01", name: "Rahul Sharma", company: "TechStart Solutions", status: "Qualified", assignedTo: "Alex", assignedToAvatar: "/avatars/alex.jpg", date: "2024-09-01", value: 150000 },
+  { id: "LEAD-02", name: "Priya Patel", company: "Digital Innovations", status: "Contacted", assignedTo: "Casey", assignedToAvatar: "/avatars/casey.jpg", date: "2024-09-02", value: 120000 },
+  { id: "LEAD-03", name: "Sunita Verma", company: "GrowthCorp", status: "New", assignedTo: "N/A", assignedToAvatar: "", date: "2024-09-03", value: 210000 },
+  { id: "LEAD-04", name: "Kavya Reddy", company: "SuccessStory Ltd", status: "Converted", assignedTo: "Alex", assignedToAvatar: "/avatars/alex.jpg", date: "2024-08-15", value: 180000 },
+  { id: "LEAD-05", name: "Ankit Gupta", company: "Future Enterprises", status: "Rejected", assignedTo: "Casey", assignedToAvatar: "/avatars/casey.jpg", date: "2024-08-20", value: 90000 },
 ]
 
-const leadsAnalyticsData = [
-  { month: "Jan", leads: 45, converted: 12 },
-  { month: "Feb", leads: 52, converted: 15 },
-  { month: "Mar", leads: 48, converted: 14 },
-  { month: "Apr", leads: 61, converted: 18 },
-  { month: "May", leads: 55, converted: 16 },
-  { month: "Jun", leads: 67, converted: 22 },
-  { month: "Jul", leads: 58, converted: 19 },
-  { month: "Aug", leads: 72, converted: 25 },
+const mockInteractions: Interaction[] = [
+    { id: "INT-1", employee: "Casey", employeeAvatar: "/avatars/casey.jpg", timestamp: "2024-09-02 11:00 AM", comment: "Initial contact made. Client is interested in a full-service package. Follow-up call scheduled for tomorrow." },
+    { id: "INT-2", employee: "Casey", employeeAvatar: "/avatars/casey.jpg", timestamp: "2024-09-03 10:30 AM", comment: "Follow-up call complete. Sent over the proposal document. They will review and get back by EOW." },
 ]
 
-const leadSourcesData = [
-  { name: "GOAT Mastermind", value: 45, color: "#FFD700" },
-  { name: "Social Media", value: 25, color: "#8B5CF6" },
-  { name: "Kennet Alphy", value: 20, color: "#06B6D4" },
-  { name: "Alfred Joshua", value: 10, color: "#F59E0B" },
-]
+export default function LeadsManagementPage() {
+  const [leads, setLeads] = React.useState<Lead[]>(initialLeads)
+  const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null)
+  const [filter, setFilter] = React.useState<LeadStatus | "All">("All")
 
-// Chart configurations for better tooltip styling
-const leadTrendConfig = {
-  leads: {
-    label: "Total Leads",
-    color: "hsl(var(--chart-1))",
-  },
-  converted: {
-    label: "Converted Leads",
-    color: "hsl(var(--chart-2))",
-  },
-};
-
-const leadSourcesConfig = {
-  value: {
-    label: "Lead Count",
-    color: "hsl(var(--chart-1))",
-  },
-};
-
-export default function LeadManagementPage() {
-  const [leads, setLeads] = useState<Lead[]>(initialLeads)
-  const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false)
-  const [showAnalytics, setShowAnalytics] = useState(false)
-
-  const handleAddLead = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    const newLead: Lead = {
-      id: (leads.length + 1).toString(),
-      company: formData.get("company") as string,
-      contact: formData.get("contact") as string,
-      source: formData.get("source") as string,
-      budget: formData.get("budget") as string,
-      status: "new",
-      nextAction: "Initial Contact",
-    }
-    setLeads([...leads, newLead])
-    setIsAddLeadModalOpen(false)
-  }
-
-  const getStatusColor = (status: string) => {
+  const getStatusBadge = (status: LeadStatus) => {
     switch (status) {
-      case "new":
-        return "bg-pink-500/20 text-pink-400"
-      case "contacted":
-        return "bg-yellow-500/20 text-yellow-400"
-      case "qualified":
-        return "bg-blue-500/20 text-blue-400"
-      case "converted":
-        return "bg-green-500/20 text-green-400"
-      default:
-        return "bg-gray-500/20 text-gray-400"
+      case "Converted": return <Badge className="bg-green-500">Converted</Badge>
+      case "Qualified": return <Badge className="bg-blue-500">Qualified</Badge>
+      case "Contacted": return <Badge className="bg-yellow-500">Contacted</Badge>
+      case "New": return <Badge variant="secondary">New</Badge>
+      case "Rejected": return <Badge variant="destructive">Rejected</Badge>
     }
   }
+
+  const filteredLeads = leads.filter(lead => filter === "All" || lead.status === filter)
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Users className="h-8 w-8" /> Lead Management
-          </h1>
-          <p className="text-gray-400 mt-1">Track and manage your sales leads</p>
-        </div>
-        <div className="flex gap-3">
-          <Button onClick={() => setShowAnalytics(!showAnalytics)}>
-            <BarChart3 className="w-4 h-4 mr-2" />
-            {showAnalytics ? "Hide" : "Show"} Analytics
-          </Button>
-          <Dialog open={isAddLeadModalOpen} onOpenChange={setIsAddLeadModalOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Lead
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Lead</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddLead} className="space-y-4">
-                <div>
-                  <Label>Company Name</Label>
-                  <Input name="company" placeholder="Enter company name" required />
-                </div>
-                <div>
-                  <Label>Contact Person</Label>
-                  <Input name="contact" placeholder="Name - Position" required />
-                </div>
-                <div>
-                  <Label>Source</Label>
-                  <Select name="source" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select source" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="GOAT Mastermind">GOAT Mastermind</SelectItem>
-                      <SelectItem value="Social Media">Social Media</SelectItem>
-                      <SelectItem value="Kennet Alphy">Kennet Alphy</SelectItem>
-                      <SelectItem value="Alfred Joshua">Alfred Joshua</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Budget</Label>
-                  <Input name="budget" placeholder="₹1.5L/month" required />
-                </div>
-                <Button type="submit" className="w-full">
-                  Add Lead
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Leads Management</h1>
+        <p className="text-muted-foreground">Approve, reject, and reassign incoming leads.</p>
       </div>
 
-      {showAnalytics && (
-        <Card className="relative">
-          <BorderBeam />
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Lead Analytics</CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => setShowAnalytics(false)} aria-label="Close analytics">
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Lead Conversion Trend</h3>
-              <ChartContainer config={leadTrendConfig}>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={leadsAnalyticsData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <ChartTooltip
-                      content={<ChartTooltipContent indicator="line" />}
-                    />
-                    <Line type="monotone" dataKey="leads" stroke="var(--color-leads)" strokeWidth={3} />
-                    <Line type="monotone" dataKey="converted" stroke="var(--color-converted)" strokeWidth={3} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Lead Sources</h3>
-              <ChartContainer config={leadSourcesConfig}>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={leadSourcesData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {leadSourcesData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <ChartTooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <div className="flex items-center space-x-2">
+        <Tabs defaultValue="All" onValueChange={(value) => setFilter(value as LeadStatus | "All")}>
+            <TabsList>
+                <TabsTrigger value="All">All</TabsTrigger>
+                <TabsTrigger value="New">New</TabsTrigger>
+                <TabsTrigger value="Qualified">Qualified</TabsTrigger>
+                <TabsTrigger value="Contacted">Contacted</TabsTrigger>
+                <TabsTrigger value="Converted">Converted</TabsTrigger>
+                <TabsTrigger value="Rejected">Rejected</TabsTrigger>
+            </TabsList>
+        </Tabs>
+      </div>
 
-      <div className="grid gap-4">
-        {leads.map((lead) => (
-          <Card key={lead.id} className="relative">
-            <BorderBeam delay={Math.random() * 2} />
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold">{lead.company}</h3>
-                    <Badge className={`${getStatusColor(lead.status)} border-0`}>{lead.status}</Badge>
-                  </div>
-                  <p className="text-gray-400 mb-1">{lead.contact}</p>
-                  <p className="text-sm text-gray-500">Source: {lead.source}</p>
+      <Card>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lead</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Assigned To</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Value</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredLeads.map((lead) => (
+                <TableRow key={lead.id} onClick={() => setSelectedLead(lead)} className="cursor-pointer">
+                  <TableCell className="font-medium">
+                    <div>{lead.name}</div>
+                    <div className="text-sm text-muted-foreground">{lead.company}</div>
+                  </TableCell>
+                  <TableCell>{getStatusBadge(lead.status)}</TableCell>
+                  <TableCell>
+                    {lead.assignedTo !== "N/A" ? (
+                        <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6"><AvatarImage src={lead.assignedToAvatar} /><AvatarFallback>{lead.assignedTo.charAt(0)}</AvatarFallback></Avatar>
+                            <span>{lead.assignedTo}</span>
+                        </div>
+                    ) : "N/A"}
+                  </TableCell>
+                  <TableCell>{new Date(lead.date).toLocaleDateString()}</TableCell>
+                  <TableCell>${lead.value.toLocaleString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Sheet open={!!selectedLead} onOpenChange={(isOpen) => !isOpen && setSelectedLead(null)}>
+        <SheetContent className="w-[500px] sm:max-w-lg">
+          {selectedLead && (
+            <>
+              <SheetHeader>
+                <SheetTitle>{selectedLead.name} - {selectedLead.company}</SheetTitle>
+                <SheetDescription>Lead Value: ${selectedLead.value.toLocaleString()}</SheetDescription>
+              </SheetHeader>
+              <div className="py-6 space-y-6">
+                <div>
+                    <h4 className="font-semibold mb-2">Lead Demands</h4>
+                    <p className="text-sm text-muted-foreground">Client is looking for a full-service social media management and content creation package, with a focus on short-form video for Instagram and TikTok. They require monthly performance reports.</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-semibold">{lead.budget}</p>
-                  <p className="text-sm text-gray-400">Next: {lead.nextAction}</p>
-                </div>
+                 <div>
+                    <h4 className="font-semibold mb-2">Interaction Log</h4>
+                    <div className="space-y-4">
+                        {mockInteractions.map(interaction => (
+                            <div key={interaction.id} className="flex gap-3">
+                                <Avatar className="h-8 w-8"><AvatarImage src={interaction.employeeAvatar} /><AvatarFallback>{interaction.employee.charAt(0)}</AvatarFallback></Avatar>
+                                <div>
+                                    <div className="text-sm">
+                                        <span className="font-semibold">{interaction.employee}</span>
+                                        <span className="text-muted-foreground ml-2">{interaction.timestamp}</span>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">{interaction.comment}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                 </div>
+                 <div>
+                     <h4 className="font-semibold mb-2">Reason for Acceptance/Rejection</h4>
+                     <Textarea placeholder="Provide a reason for your decision..."/>
+                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <SheetFooter className="grid grid-cols-3 gap-2">
+                <Button variant="destructive"><XCircle className="mr-2 h-4 w-4"/> Reject</Button>
+                <Button variant="secondary"><UserPlus className="mr-2 h-4 w-4"/> Reassign</Button>
+                <Button><CheckCircle className="mr-2 h-4 w-4"/> Approve</Button>
+              </SheetFooter>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

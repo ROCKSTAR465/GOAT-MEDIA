@@ -33,6 +33,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PlusCircle, ListFilter, Upload, Paperclip } from "lucide-react"
+import { motion } from "framer-motion"
+import { Card, CardContent } from "@/components/ui/card"
 
 type TaskStatus = "Pending" | "Completed" | "Overdue"
 
@@ -175,30 +177,32 @@ export default function EmployeeTasksPage() {
         <Button variant={filter === "Overdue" ? "secondary" : "ghost"} onClick={() => setFilter("Overdue")}>Overdue</Button>
       </div>
 
-      <Card>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Task</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Deadline</TableHead>
-                <TableHead>Assigned By</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTasks.map((task) => (
-                <TableRow key={task.id} onClick={() => setSelectedTask(task)} className="cursor-pointer">
-                  <TableCell className="font-medium">{task.name}</TableCell>
-                  <TableCell>{getStatusBadge(task.status)}</TableCell>
-                  <TableCell>{new Date(task.deadline).toLocaleDateString()}</TableCell>
-                  <TableCell>{task.assignedBy}</TableCell>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <Card>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Task</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Deadline</TableHead>
+                  <TableHead>Assigned By</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {filteredTasks.map((task) => (
+                  <TableRow key={task.id} onClick={() => setSelectedTask(task)} className="cursor-pointer">
+                    <TableCell className="font-medium">{task.name}</TableCell>
+                    <TableCell>{getStatusBadge(task.status)}</TableCell>
+                    <TableCell>{new Date(task.deadline).toLocaleDateString()}</TableCell>
+                    <TableCell>{task.assignedBy}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       <Sheet open={!!selectedTask} onOpenChange={(isOpen) => !isOpen && setSelectedTask(null)}>
         <SheetContent className="w-[400px] sm:w-[540px]">
@@ -246,8 +250,3 @@ export default function EmployeeTasksPage() {
     </div>
   )
 }
-
-// We need to add Card and CardContent to the import list from components/ui/card
-// This is a workaround for the fact that the linter doesn't know about the imports
-
-import { Card, CardContent } from "@/components/ui/card"
