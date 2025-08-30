@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Meteors } from "@/components/ui/meteors"
 import { motion } from "framer-motion"
+import { Loader2 } from "lucide-react"
 
 export default function DashboardLayout({
   children,
@@ -32,21 +33,24 @@ export default function DashboardLayout({
 
     try {
       const user = JSON.parse(userData)
+      if (!['employee', 'executive'].includes(user.role)) {
+        // If role is invalid, log out and redirect to login
+        localStorage.removeItem('isAuthenticated')
+        localStorage.removeItem('user')
+        router.push('/login')
+        return
+      }
+
       setUserRole(user.role)
       setIsAuthenticated(true)
 
-      // Redirect to role-specific dashboard if on main dashboard
-      if (pathname === '/dashboard') {
+      // Redirect to role-specific dashboard if on a generic dashboard path
+      if (pathname === '/dashboard' || pathname === '/dashboard/') {
         const roleRoutes = {
-          creative: '/dashboard/creative',
-          manager: '/dashboard/manager',
-          social: '/dashboard/social',
-          finance: '/dashboard/finance'
+          employee: '/dashboard/employee',
+          executive: '/dashboard/executive',
         }
-        
-        if (roleRoutes[user.role as keyof typeof roleRoutes]) {
-          router.push(roleRoutes[user.role as keyof typeof roleRoutes])
-        }
+        router.push(roleRoutes[user.role as keyof typeof roleRoutes])
       }
     } catch (error) {
       console.error('Error parsing user data:', error)
@@ -61,7 +65,14 @@ export default function DashboardLayout({
   }
 
   if (!isAuthenticated) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>
+    return (
+        <div className="min-h-screen w-full flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                <p className="text-muted-foreground">Loading Dashboard...</p>
+            </div>
+        </div>
+    )
   }
 
   return (

@@ -4,28 +4,21 @@ import * as React from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import {
-  BarChart3,
-  TrendingUp,
-  Users,
-  UserCheck,
-  Film,
+  LayoutDashboard,
+  ClipboardList,
+  Bot,
   Calendar,
-  DollarSign,
+  Wand2,
+  Bell,
+  LifeBuoy,
+  Briefcase,
+  Users,
+  Video,
+  ClipboardCheck,
+  TrendingUp,
   Mountain,
   Settings,
-  Palette,
-  Target,
-  Share2,
-  Receipt,
-  FileText,
-  Camera,
-  Edit3,
-  Hash,
-  PieChart,
-  Calculator,
-  Clock,
-  Bell,
-  MessageSquare
+  LogOut,
 } from "lucide-react"
 
 import { NavMain } from "@/components/dashboard/nav-main"
@@ -46,180 +39,56 @@ const getRoleData = (role: string) => {
     user: {
       name: "User",
       email: "user@thegoatmedia.com",
-      avatar: "/avatars/user.jpg",
+      avatar: "/avatars/user.jpg", // A generic avatar
     },
     navSecondary: [
       {
+        title: "Help Centre",
+        url: `/dashboard/${role}/help-centre`,
+        icon: LifeBuoy,
+      },
+      {
         title: "Settings",
-        url: "/dashboard/settings",
+        url: "/dashboard/settings", // A generic settings page
         icon: Settings,
       },
     ],
   }
 
   switch (role) {
-    case "creative":
+    case "employee":
       return {
         ...baseData,
         user: {
           ...baseData.user,
-          name: "Creative Team Member",
-          email: "creative@thegoatmedia.com",
+          name: "Alex (Employee)",
+          email: "employee@thegoatmedia.com",
         },
         navMain: [
-          {
-            title: "Dashboard",
-            url: "/dashboard/creative",
-            icon: BarChart3,
-          },
-          {
-            title: "My Scripts",
-            url: "/dashboard/creative/scripts",
-            icon: FileText,
-          },
-          {
-            title: "Shoot Schedule",
-            url: "/dashboard/creative/schedule",
-            icon: Camera,
-          },
-          {
-            title: "Editing Queue",
-            url: "/dashboard/creative/editing",
-            icon: Edit3,
-          },
-          {
-            title: "Time Tracking",
-            url: "/dashboard/creative/time",
-            icon: Clock,
-          },
-          {
-            title: "Client Feedback",
-            url: "/dashboard/creative/feedback",
-            icon: MessageSquare,
-          },
+          { title: "Home", url: "/dashboard/employee", icon: LayoutDashboard },
+          { title: "Tasks & Scheduling", url: "/dashboard/employee/tasks", icon: ClipboardList },
+          { title: "Content Studio", url: "/dashboard/employee/content-studio", icon: Bot },
+          { title: "Shoot Planner", url: "/dashboard/employee/shoot-planner", icon: Calendar },
+          { title: "Editing Workflow", url: "/dashboard/employee/editing-workflow", icon: Wand2 },
+          { title: "Notifications", url: "/dashboard/employee/notifications", icon: Bell },
         ],
       }
-    case "manager":
+    case "executive":
       return {
         ...baseData,
         user: {
           ...baseData.user,
-          name: "Project Manager",
-          email: "manager@thegoatmedia.com",
+          name: "Morgan (Executive)",
+          email: "executive@thegoatmedia.com",
         },
         navMain: [
-          {
-            title: "Dashboard",
-            url: "/dashboard/manager",
-            icon: BarChart3,
-          },
-          {
-            title: "Project Overview",
-            url: "/dashboard/manager/projects",
-            icon: Target,
-          },
-          {
-            title: "Team Management",
-            url: "/dashboard/manager/team",
-            icon: Users,
-          },
-          {
-            title: "Resource Allocation",
-            url: "/dashboard/manager/resources",
-            icon: UserCheck,
-          },
-          {
-            title: "Client Projects",
-            url: "/dashboard/manager/clients",
-            icon: TrendingUp,
-          },
-          {
-            title: "Timeline Management",
-            url: "/dashboard/manager/timeline",
-            icon: Calendar,
-          },
-        ],
-      }
-    case "social":
-      return {
-        ...baseData,
-        user: {
-          ...baseData.user,
-          name: "Social Media Manager",
-          email: "social@thegoatmedia.com",
-        },
-        navMain: [
-          {
-            title: "Dashboard",
-            url: "/dashboard/social",
-            icon: BarChart3,
-          },
-          {
-            title: "Publishing Calendar",
-            url: "/dashboard/social/calendar",
-            icon: Calendar,
-          },
-          {
-            title: "Content Creation",
-            url: "/dashboard/social/content",
-            icon: Film,
-          },
-          {
-            title: "Analytics",
-            url: "/dashboard/social/analytics",
-            icon: TrendingUp,
-          },
-          {
-            title: "Hashtag Management",
-            url: "/dashboard/social/hashtags",
-            icon: Hash,
-          },
-          {
-            title: "Platform Performance",
-            url: "/dashboard/social/platforms",
-            icon: Share2,
-          },
-        ],
-      }
-    case "finance":
-      return {
-        ...baseData,
-        user: {
-          ...baseData.user,
-          name: "Finance Team Member",
-          email: "finance@thegoatmedia.com",
-        },
-        navMain: [
-          {
-            title: "Dashboard",
-            url: "/dashboard/finance",
-            icon: BarChart3,
-          },
-          {
-            title: "Budget Management",
-            url: "/dashboard/finance/budgets",
-            icon: Target,
-          },
-          {
-            title: "Invoice Management",
-            url: "/dashboard/finance/invoices",
-            icon: Receipt,
-          },
-          {
-            title: "Financial Reports",
-            url: "/dashboard/finance/reports",
-            icon: PieChart,
-          },
-          {
-            title: "Cost Analysis",
-            url: "/dashboard/finance/costs",
-            icon: Calculator,
-          },
-          {
-            title: "Client Accounts",
-            url: "/dashboard/finance/clients",
-            icon: Users,
-          },
+          { title: "Home", url: "/dashboard/executive", icon: LayoutDashboard },
+          { title: "Leads Management", url: "/dashboard/executive/leads-management", icon: Briefcase },
+          { title: "Team Performance", url: "/dashboard/executive/team-performance", icon: Users },
+          { title: "Shoot Oversight", url: "/dashboard/executive/shoot-oversight", icon: Video },
+          { title: "Editing Oversight", url: "/dashboard/executive/editing-oversight", icon: ClipboardCheck },
+          { title: "Revenue", url: "/dashboard/executive/revenue", icon: TrendingUp },
+          { title: "Notifications", url: "/dashboard/executive/notifications", icon: Bell },
         ],
       }
     default:
@@ -229,7 +98,7 @@ const getRoleData = (role: string) => {
           {
             title: "Dashboard",
             url: "/dashboard",
-            icon: BarChart3,
+            icon: LayoutDashboard,
           },
         ],
       }
@@ -242,6 +111,18 @@ export function AppSidebar({ onLogout, userRole, ...props }: React.ComponentProp
 }) {
   const data = getRoleData(userRole || "")
 
+  // A simple component to fetch user info from localStorage
+  const [userName, setUserName] = React.useState(data.user.name)
+  React.useEffect(() => {
+    try {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}")
+        setUserName(storedUser.name || data.user.name)
+    } catch (e) {
+        //ignore
+    }
+  }, [userRole, data.user.name])
+
+
   return (
     <motion.div
       initial={{ x: -300, opacity: 0 }}
@@ -249,32 +130,35 @@ export function AppSidebar({ onLogout, userRole, ...props }: React.ComponentProp
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <Sidebar collapsible="offcanvas" {...props}>
-            <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                  <Mountain className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">The GOAT Media</span>
-                  <span className="truncate text-xs">
-                    {userRole ? `${userRole.charAt(0).toUpperCase() + userRole.slice(1)} Dashboard` : "Employee Dashboard"}
-                  </span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} onLogout={onLogout} />
-      </SidebarFooter>
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild>
+                <Link href={`/dashboard/${userRole}`}>
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                    <Mountain className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">GOAT Media</span>
+                    <span className="truncate text-xs">
+                      {userRole ? `${userRole.charAt(0).toUpperCase() + userRole.slice(1)} Dashboard` : "Dashboard"}
+                    </span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavMain items={data.navMain} />
+          <NavSecondary items={data.navSecondary} className="mt-auto" />
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser
+            user={{...data.user, name: userName}}
+            onLogout={onLogout}
+          />
+        </SidebarFooter>
     </Sidebar>
     </motion.div>
   )
