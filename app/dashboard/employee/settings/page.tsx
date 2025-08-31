@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { User, Palette, Bell, Lock, Settings, LifeBuoy, Upload, Sun, Moon, Laptop } from "lucide-react"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Input } from "@/components/ui/input"
@@ -51,6 +52,7 @@ export default function EmployeeSettingsPage() {
 
         <div className="flex-1">
           <TabsContent value="account">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -143,8 +145,10 @@ export default function EmployeeSettingsPage() {
                     <Button>Save Changes</Button>
                 </div>
             </div>
+            </motion.div>
           </TabsContent>
           <TabsContent value="personalization">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
              <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -216,8 +220,10 @@ export default function EmployeeSettingsPage() {
                     <Button>Save Changes</Button>
                 </div>
             </div>
+            </motion.div>
           </TabsContent>
           <TabsContent value="notifications">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
              <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -286,8 +292,10 @@ export default function EmployeeSettingsPage() {
                     <Button>Save Changes</Button>
                 </div>
             </div>
+            </motion.div>
           </TabsContent>
            <TabsContent value="privacy">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
              <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -363,8 +371,10 @@ export default function EmployeeSettingsPage() {
                     <Button>Save Changes</Button>
                 </div>
             </div>
+            </motion.div>
           </TabsContent>
           <TabsContent value="system">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -442,8 +452,10 @@ export default function EmployeeSettingsPage() {
                     <Button>Save Changes</Button>
                 </div>
             </div>
+            </motion.div>
           </TabsContent>
           <TabsContent value="support">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -470,6 +482,7 @@ export default function EmployeeSettingsPage() {
                     </CardContent>
                 </Card>
             </div>
+            </motion.div>
           </TabsContent>
         </div>
       </Tabs>

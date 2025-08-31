@@ -8,8 +8,10 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { User, Palette, Bell, Lock, Settings, LifeBuoy, Upload, Sun, Moon, Laptop, Users as UsersIcon } from "lucide-react"
+import { User, Palette, Bell, Lock, Settings, LifeBuoy, Upload, Sun, Moon, Laptop, Users as UsersIcon, CreditCard } from "lucide-react"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -37,6 +39,12 @@ const teamMembers = [
     { id: 3, name: "Taylor", role: "Video Editor", status: "On Leave", avatar: "/avatars/taylor.jpg" },
 ]
 
+const invoiceHistory = [
+    { id: "INV-001", date: "2025-08-01", amount: "$5,000", status: "Paid" },
+    { id: "INV-002", date: "2025-07-01", amount: "$5,000", status: "Paid" },
+    { id: "INV-003", date: "2025-06-01", amount: "$5,000", status: "Paid" },
+]
+
 export default function ExecutiveSettingsPage() {
   return (
     <div className="space-y-6">
@@ -54,10 +62,12 @@ export default function ExecutiveSettingsPage() {
           <TabsTrigger value="system" className="w-full justify-start gap-2"><Settings className="h-4 w-4"/> System Preferences</TabsTrigger>
           <TabsTrigger value="support" className="w-full justify-start gap-2"><LifeBuoy className="h-4 w-4"/> Support & About</TabsTrigger>
           <TabsTrigger value="team" className="w-full justify-start gap-2"><UsersIcon className="h-4 w-4"/> Team & Roles</TabsTrigger>
+          <TabsTrigger value="billing" className="w-full justify-start gap-2"><CreditCard className="h-4 w-4"/> Billing & Subscription</TabsTrigger>
         </TabsList>
 
         <div className="flex-1">
           <TabsContent value="account">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -150,8 +160,10 @@ export default function ExecutiveSettingsPage() {
                     <Button>Save Changes</Button>
                 </div>
             </div>
+            </motion.div>
           </TabsContent>
           <TabsContent value="personalization">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
              <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -223,8 +235,10 @@ export default function ExecutiveSettingsPage() {
                     <Button>Save Changes</Button>
                 </div>
             </div>
+            </motion.div>
           </TabsContent>
           <TabsContent value="notifications">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
              <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -293,8 +307,10 @@ export default function ExecutiveSettingsPage() {
                     <Button>Save Changes</Button>
                 </div>
             </div>
+            </motion.div>
           </TabsContent>
            <TabsContent value="privacy">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
              <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -370,8 +386,10 @@ export default function ExecutiveSettingsPage() {
                     <Button>Save Changes</Button>
                 </div>
             </div>
+            </motion.div>
           </TabsContent>
           <TabsContent value="system">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -449,8 +467,10 @@ export default function ExecutiveSettingsPage() {
                     <Button>Save Changes</Button>
                 </div>
             </div>
+            </motion.div>
           </TabsContent>
           <TabsContent value="support">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -477,8 +497,59 @@ export default function ExecutiveSettingsPage() {
                     </CardContent>
                 </Card>
             </div>
+            </motion.div>
+          </TabsContent>
+          <TabsContent value="billing">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+            <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Subscription Plan</CardTitle>
+                        <CardDescription>You are currently on the <strong>Pro</strong> plan.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <Label>Renewal Date: September 1, 2025</Label>
+                            <Progress value={80} className="mt-2"/>
+                        </div>
+                        <Button>Upgrade Plan</Button>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Invoice History</CardTitle>
+                        <CardDescription>Your past invoices.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Invoice ID</TableHead>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {invoiceHistory.map((invoice) => (
+                                    <TableRow key={invoice.id}>
+                                        <TableCell>{invoice.id}</TableCell>
+                                        <TableCell>{invoice.date}</TableCell>
+                                        <TableCell>{invoice.amount}</TableCell>
+                                        <TableCell>{invoice.status}</TableCell>
+                                        <TableCell><Button variant="outline" size="sm">Download PDF</Button></TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
+            </motion.div>
           </TabsContent>
           <TabsContent value="team">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -520,6 +591,7 @@ export default function ExecutiveSettingsPage() {
                     </CardContent>
                 </Card>
             </div>
+            </motion.div>
           </TabsContent>
         </div>
       </Tabs>
