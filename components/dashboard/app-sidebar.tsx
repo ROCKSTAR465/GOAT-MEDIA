@@ -47,6 +47,11 @@ const getRoleData = (role: string) => {
         url: `/dashboard/${role}/help-centre`,
         icon: LifeBuoy,
       },
+      {
+        title: "Settings",
+        url: `/dashboard/${role}/settings`,
+        icon: Settings,
+      },
     ],
   }
 
