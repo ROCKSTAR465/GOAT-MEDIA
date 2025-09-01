@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "netlify-build": "npm install && next build",
-    "seed": "ts-node --require dotenv/config scripts/seed.ts"
+    "seed": "ts-node -P tsconfig.scripts.json --require dotenv/config scripts/seed.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
