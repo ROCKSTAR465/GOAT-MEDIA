@@ -6,89 +6,83 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart } from "recharts"
-import { Bell, CheckCircle, Clock, Video, FileText, User } from "lucide-react"
-
-// Mock Data
-const employee = {
-  name: "Alex",
-  role: "Content Strategist",
-  joinedDate: "2023-01-15",
-  avatar: "/avatars/alex.jpg", // Placeholder avatar
-}
-
-const quickStats = {
-  tasksDue: 5,
-  pendingApprovals: 2,
-  shootsThisWeek: 3,
-}
-
-const taskCompletionData = [
-  { week: "W1", completed: 8, total: 10 },
-  { week: "W2", completed: 7, total: 10 },
-  { week: "W3", completed: 9, total: 10 },
-  { week: "W4", completed: 6, total: 8 },
-]
-
-const workloadData = [
-  { day: "Mon", deadlines: 2 },
-  { day: "Tue", deadlines: 3 },
-  { day: "Wed", deadlines: 1 },
-  { day: "Thu", deadlines: 4 },
-  { day: "Fri", deadlines: 2 },
-  { day: "Sat", deadlines: 0 },
-  { day: "Sun", deadlines: 1 },
-]
-
-const notifications = [
-  { id: 1, text: "Shoot rescheduled to tomorrow.", time: "1h ago" },
-  { id: 2, text: "New script 'Project Alpha' assigned.", time: "3h ago" },
-  { id: 3, text: "Your latest edit was approved.", time: "5h ago" },
-]
-
-const scriptsInReview = [
-  { id: 1, title: "IG Reel - Q3 Campaign", version: "V2" },
-  { id: 2, title: "YouTube Ad - New Product", version: "V1" },
-]
-
-const shootsToday = [
-  { id: 1, title: "Client X - Product Shoot", time: "10:00 AM" },
-]
+import { Bell, FileText, Video, X } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
+import { EmployeeDashboardData, Notification, Script, Shoot } from "@/lib/types"
 
 export default function EmployeeDashboardPage() {
-    const [user, setUser] = React.useState(employee);
+  const [data, setData] = React.useState<EmployeeDashboardData | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-    React.useEffect(() => {
-        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-        if(storedUser.name) {
-            setUser({
-                name: storedUser.name,
-                role: storedUser.designation,
-                joinedDate: "2023-02-20", // mock
-                avatar: `/avatars/${storedUser.name.toLowerCase()}.jpg`
-            })
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch('/api/employee/dashboard');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
         }
-    }, [])
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        if (err instanceof Error) {
+            setError(err.message);
+        } else {
+            setError("An unknown error occurred");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const handleDismissNotification = async (notificationId: string) => {
+    if (!data) return;
+    // Optimistically update the UI
+    const originalNotifications = data.notifications;
+    setData({
+        ...data,
+        notifications: data.notifications.filter((n: Notification) => n.id !== notificationId)
+    });
+
+    try {
+        await fetch('/api/notifications/dismiss', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notification_id: notificationId }),
+        });
+    } catch (error) {
+        console.error("Failed to dismiss notification:", error);
+        // Revert if the API call fails
+        setData({ ...data, notifications: originalNotifications });
+    }
+  };
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (error) {
+    return <div className="text-red-500">Error: {error}</div>;
+  }
+
+  if (!data) {
+    return <div>No data found.</div>;
+  }
+
+  const { user, quickStats, taskCompletionData, workloadData, notifications, scriptsInReview, shootsToday } = data;
 
   return (
     <div className="space-y-6">
@@ -104,11 +98,10 @@ export default function EmployeeDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-1 space-y-6">
-          {/* Employee Info Card */}
           <Card>
             <CardHeader className="flex flex-row items-center gap-4">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage src={user.avatar_url} alt={user.name} />
                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
@@ -117,28 +110,16 @@ export default function EmployeeDashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Joined on {new Date(user.joinedDate).toLocaleDateString()}</p>
+              <p className="text-sm text-muted-foreground">Joined on {new Date(user.joined_date).toLocaleDateString()}</p>
             </CardContent>
           </Card>
 
-          {/* Quick Stats */}
           <Card>
-            <CardHeader>
-              <CardTitle>Quick Stats</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Quick Stats</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Tasks due today</span>
-                <span className="font-bold text-lg">{quickStats.tasksDue}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Approvals pending</span>
-                <span className="font-bold text-lg">{quickStats.pendingApprovals}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Shoots this week</span>
-                <span className="font-bold text-lg">{quickStats.shootsThisWeek}</span>
-              </div>
+              <div className="flex justify-between items-center"><span className="text-muted-foreground">Tasks due today</span><span className="font-bold text-lg">{quickStats.tasksDue}</span></div>
+              <div className="flex justify-between items-center"><span className="text-muted-foreground">Approvals pending</span><span className="font-bold text-lg">{quickStats.pendingApprovals}</span></div>
+              <div className="flex justify-between items-center"><span className="text-muted-foreground">Shoots this week</span><span className="font-bold text-lg">{quickStats.shootsThisWeek}</span></div>
             </CardContent>
           </Card>
         </div>
@@ -146,38 +127,15 @@ export default function EmployeeDashboardPage() {
         {/* Middle Column - Charts */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Task Completion Rate</CardTitle>
-              <CardDescription>Your weekly task completion progress.</CardDescription>
-            </CardHeader>
+            <CardHeader><CardTitle>Task Completion Rate</CardTitle><CardDescription>Your weekly task completion progress.</CardDescription></CardHeader>
             <CardContent>
-              <ChartContainer className="h-48 w-full" config={{}}>
-                <BarChart data={taskCompletionData} margin={{ top: 20, right: 20, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="week" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="completed" fill="var(--color-primary)" radius={4} />
-                </BarChart>
-              </ChartContainer>
+              <ChartContainer className="h-48 w-full" config={{}}><BarChart data={taskCompletionData} margin={{ top: 20, right: 20, left: -20, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="week" /><YAxis /><ChartTooltip content={<ChartTooltipContent />} /><Bar dataKey="completed" fill="var(--color-primary)" radius={4} /></BarChart></ChartContainer>
             </CardContent>
           </Card>
-
           <Card>
-            <CardHeader>
-              <CardTitle>Upcoming Workload</CardTitle>
-              <CardDescription>Your deadlines over the next 7 days.</CardDescription>
-            </CardHeader>
+            <CardHeader><CardTitle>Upcoming Workload</CardTitle><CardDescription>Your deadlines over the next 7 days.</CardDescription></CardHeader>
             <CardContent>
-              <ChartContainer className="h-48 w-full" config={{}}>
-                <LineChart data={workloadData} margin={{ top: 20, right: 20, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line type="monotone" dataKey="deadlines" stroke="var(--color-primary)" strokeWidth={2} />
-                </LineChart>
-              </ChartContainer>
+              <ChartContainer className="h-48 w-full" config={{}}><LineChart data={workloadData} margin={{ top: 20, right: 20, left: -20, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="day" /><YAxis /><ChartTooltip content={<ChartTooltipContent />} /><Line type="monotone" dataKey="deadlines" stroke="var(--color-primary)" strokeWidth={2} /></LineChart></ChartContainer>
             </CardContent>
           </Card>
         </div>
@@ -186,54 +144,61 @@ export default function EmployeeDashboardPage() {
       {/* Bottom Row - Preview Panels */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Bell className="w-5 h-5" /> Notifications</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="w-5 h-5" /> Notifications</CardTitle></CardHeader>
           <CardContent>
             <ul className="space-y-3">
-              {notifications.map(n => (
-                <li key={n.id} className="text-sm flex justify-between">
-                  <span>{n.text}</span>
-                  <span className="text-muted-foreground">{n.time}</span>
+              {notifications.map((n: Notification) => (
+                <li key={n.id} className="text-sm flex justify-between items-center group">
+                  <span>{n.message}</span>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => handleDismissNotification(n.id)}><X className="h-4 w-4" /></Button>
                 </li>
               ))}
             </ul>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5" /> Scripts in Review</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5" /> Scripts in Review</CardTitle></CardHeader>
           <CardContent>
             <ul className="space-y-3">
-              {scriptsInReview.map(s => (
-                <li key={s.id} className="text-sm flex justify-between">
-                  <span>{s.title}</span>
-                  <Badge variant="outline">{s.version}</Badge>
-                </li>
-              ))}
+              {scriptsInReview.map((s: Script) => (<li key={s.id} className="text-sm flex justify-between"><span>{s.title}</span><Badge variant="outline">{s.version}</Badge></li>))}
             </ul>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Video className="w-5 h-5" /> Shoots Today</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Video className="w-5 h-5" /> Shoots Today</CardTitle></CardHeader>
           <CardContent>
-            {shootsToday.length > 0 ? (
-                <ul className="space-y-3">
-                {shootsToday.map(s => (
-                    <li key={s.id} className="text-sm flex justify-between">
-                    <span>{s.title}</span>
-                    <span className="font-semibold">{s.time}</span>
-                    </li>
-                ))}
-                </ul>
-            ) : (
-                <p className="text-sm text-muted-foreground">No shoots scheduled for today.</p>
-            )}
+            {shootsToday.length > 0 ? (<ul className="space-y-3">{shootsToday.map((s: Shoot) => (<li key={s.id} className="text-sm flex justify-between"><span>{s.title}</span><span className="font-semibold">{new Date(s.shoot_date).toLocaleTimeString()}</span></li>))}</ul>) : (<p className="text-sm text-muted-foreground">No shoots scheduled for today.</p>)}
           </CardContent>
         </Card>
+      </div>
+    </div>
+  )
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row items-start justify-between gap-4">
+        <div>
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-80 mt-2" />
+        </div>
+        <Skeleton className="h-4 w-48" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 space-y-6">
+          <Card><CardHeader className="flex flex-row items-center gap-4"><Skeleton className="h-16 w-16 rounded-full" /><div><Skeleton className="h-6 w-32" /><Skeleton className="h-4 w-24 mt-2" /></div></CardHeader><CardContent><Skeleton className="h-4 w-40" /></CardContent></Card>
+          <Card><CardHeader><Skeleton className="h-6 w-24" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></CardContent></Card>
+        </div>
+        <div className="lg:col-span-2 space-y-6">
+          <Card><CardHeader><Skeleton className="h-6 w-40" /><Skeleton className="h-4 w-48 mt-2" /></CardHeader><CardContent><Skeleton className="h-48 w-full" /></CardContent></Card>
+          <Card><CardHeader><Skeleton className="h-6 w-40" /><Skeleton className="h-4 w-48 mt-2" /></CardHeader><CardContent><Skeleton className="h-48 w-full" /></CardContent></Card>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card><CardHeader><Skeleton className="h-6 w-32" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
+        <Card><CardHeader><Skeleton className="h-6 w-32" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
+        <Card><CardHeader><Skeleton className="h-6 w-32" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
       </div>
     </div>
   )
