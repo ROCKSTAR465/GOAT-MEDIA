@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+function getWeekNumber(d: Date) {
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    var weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
+    return weekNo;
+}
+
 export async function GET() {
   try {
     // In a real app, you'd get the user ID from the session.
@@ -19,13 +27,16 @@ export async function GET() {
     const userId = user.id;
 
     // Fetch all necessary data in parallel
+    const fourWeeksAgoDate = new Date();
+    fourWeeksAgoDate.setDate(new Date().getDate() - 28);
+
     const [
       tasksData,
       notificationsData,
       scriptsData,
       shootsData,
     ] = await Promise.all([
-      supabase.from('tasks').select('*').eq('assignee_id', userId),
+      supabase.from('tasks').select('*').eq('assignee_id', userId).gte('created_at', fourWeeksAgoDate.toISOString()),
       supabase.from('notifications').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
       supabase.from('scripts').select('*').eq('status', 'In Review'),
       supabase.from('shoots').select('*').gte('shoot_date', new Date().toISOString()).limit(5),
@@ -51,21 +62,48 @@ export async function GET() {
       shootsThisWeek: shootsData.data.length, // Simplified for demo
     };
 
-    // This data would ideally be aggregated in the database for performance
-    const taskCompletionData = [
-        { week: 'W1', completed: 8, total: 10 },
-        { week: 'W2', completed: 7, total: 10 },
-        { week: 'W3', completed: 9, total: 10 },
-        { week: 'W4', completed: 6, total: 8 },
-    ];
+    const workloadData = Array(7).fill(0).map((_, i) => {
+        const date = new Date();
+        date.setDate(today.getDate() + i);
+        return {
+            date: date.toISOString().split('T')[0],
+            day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+            deadlines: 0,
+        };
+    });
 
-    const workloadData = [
-        { day: 'Mon', deadlines: 2 },
-        { day: 'Tue', deadlines: 3 },
-        { day: 'Wed', deadlines: 1 },
-        { day: 'Thu', deadlines: 4 },
-        { day: 'Fri', deadlines: 2 },
-    ];
+    tasks.forEach(task => {
+        const dueDate = new Date(task.due_date);
+        const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays >= 0 && diffDays < 7) {
+            const dayIndex = (dueDate.getDay() - today.getDay() + 7) % 7;
+            if(workloadData[dayIndex]) {
+                workloadData[dayIndex].deadlines++;
+            }
+        }
+    });
+
+    const weeklyCompletion: { [key: string]: { completed: number; total: number } } = {};
+
+    tasks.forEach(task => {
+        const taskDate = new Date(task.created_at);
+        const weekStart = new Date(taskDate);
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+        const weekKey = `W${getWeekNumber(weekStart)}`;
+
+        if (!weeklyCompletion[weekKey]) {
+            weeklyCompletion[weekKey] = { completed: 0, total: 0 };
+        }
+        weeklyCompletion[weekKey].total++;
+        if (task.status === 'Done') {
+            weeklyCompletion[weekKey].completed++;
+        }
+    });
+
+    const taskCompletionData = Object.entries(weeklyCompletion).map(([week, data]) => ({
+        week: week,
+        ...data
+    })).slice(-4);
 
     const dashboardData = {
       user,
