@@ -3,8 +3,6 @@ import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    // In a real app, you'd get the user from the session.
-    // For now, we'll hardcode the executive user 'Morgan'.
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('id, name, role, avatar_url')
@@ -16,12 +14,15 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
     const [
       leadsData,
       projectsData,
       tasksData,
     ] = await Promise.all([
-      supabase.from('leads').select('*').order('created_at', { ascending: false }),
+      supabase.from('leads').select('*').gte('created_at', sixMonthsAgo.toISOString()),
       supabase.from('projects').select('*, clients(name)').order('created_at', { ascending: false }),
       supabase.from('tasks').select('*').neq('status', 'Done').order('due_date', { ascending: true }),
     ]);
@@ -39,8 +40,9 @@ export async function GET() {
     const projects = projectsData.data || [];
     const tasks = tasksData.data || [];
 
-    // Calculate KPIs (simplified for demo)
-    const totalRevenue = leads.filter(l => l.status === 'Closed').reduce((acc, l) => acc + l.value, 0);
+    const closedLeads = leads.filter(l => l.status === 'Closed');
+    const totalRevenue = closedLeads.reduce((acc, l) => acc + l.value, 0);
+
     const summaryCards = {
       leads: { value: leads.length, change: 12.5 },
       revenue: { value: totalRevenue, change: -2.1 },
@@ -50,7 +52,7 @@ export async function GET() {
 
     const revenueByClientData = projects.reduce((acc, p) => {
         const clientName = p.clients?.name || 'Unknown Client';
-        const projectRevenue = leads.filter(l => l.client_name.includes(clientName)).reduce((sum, l) => sum + l.value, 0);
+        const projectRevenue = closedLeads.filter(l => l.client_name.includes(clientName)).reduce((sum, l) => sum + l.value, 0);
         const existingClient = acc.find(c => c.client === clientName);
         if(existingClient) {
             existingClient.revenue += projectRevenue;
@@ -60,25 +62,24 @@ export async function GET() {
         return acc;
     }, [] as { client: string; revenue: number; fill: string }[]);
 
+    const monthlyRevenue: { [key: string]: number } = {};
+    closedLeads.forEach(lead => {
+        const month = new Date(lead.created_at).toLocaleString('default', { month: 'short' });
+        monthlyRevenue[month] = (monthlyRevenue[month] || 0) + lead.value;
+    });
 
-    // Mocking some data that requires more complex queries or historical data
-    const revenueTrendData = [
-      { month: "Jan", revenue: 80000 },
-      { month: "Feb", revenue: 95000 },
-      { month: "Mar", revenue: 110000 },
-      { month: "Apr", revenue: 105000 },
-      { month: "May", revenue: 120000 },
-      { month: "Jun", revenue: totalRevenue },
-    ];
-    const expensesProfitData = [
-      { month: "Jan", expenses: 60000, profit: 20000 },
-      { month: "Feb", expenses: 65000, profit: 30000 },
-      { month: "Mar", expenses: 70000, profit: 40000 },
-      { month: "Apr", expenses: 72000, profit: 33000 },
-      { month: "May", expenses: 75000, profit: 45000 },
-      { month: "Jun", expenses: 80000, profit: totalRevenue - 80000 },
-    ];
-    const pipelineLeads = leads.slice(0, 4).map(l => ({...l, assigned: "Alex"})); // simplified
+    const revenueTrendData = Object.entries(monthlyRevenue).map(([month, revenue]) => ({ month, revenue }));
+
+    const expensesProfitData = revenueTrendData.map(item => {
+        const expenses = item.revenue * 0.7; // Mock expenses as 70% of revenue
+        return {
+            month: item.month,
+            expenses,
+            profit: item.revenue - expenses,
+        }
+    });
+
+    const pipelineLeads = leads.filter(l => l.status !== 'Closed').slice(0, 4).map(l => ({...l, assigned: "Alex"}));
 
     const dashboardData = {
       user,
@@ -87,7 +88,7 @@ export async function GET() {
       revenueTrendData,
       expensesProfitData,
       pipelineLeads,
-      projects, // For project status table
+      projects,
     };
 
     return NextResponse.json(dashboardData);
